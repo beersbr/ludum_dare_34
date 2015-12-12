@@ -1,4 +1,5 @@
 var game = {};
+var Canvas = null;
 var gl = null;
 
 var CurrentTime = 0.0;
@@ -11,7 +12,7 @@ var Height = 800;
 
 var CurrentLevel = null;
 
-
+var Player = null;
 
 function GetRC(k) {
 	return Resources[k].item;
@@ -138,17 +139,32 @@ function GameObject(position, size) {
 	}
 }
 
+function InitializeGame() {
+	Canvas = document.getElementById("canvas");
+	Width = Canvas.width;
+	Height = Canvas.height;
+
+	gl = Canvas.getContext("webgl");
+
+	Setup()
+}
 
 function Setup(levels) { 
+	PrepareLevel();
+
+	
 
 }
 
 
-function prepreLevel(id) {
-
+function PrepreLevel(id) {
+	
 }
 
 
 function UpdateAndRender() {
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+	requestAnimFrame(UpdateAndRender);	
 }
