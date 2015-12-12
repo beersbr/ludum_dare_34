@@ -63,6 +63,8 @@ function LoadResources(resource_array) {
 	tryReturn.tries = 0;
 
 	LoadResources.ids = LoadResources.ids || 0;
+    
+    audioToLoad = new Array();
 
 	for(var index in resource_array) {
 		var resource = {};
@@ -187,6 +189,8 @@ function GameObject(position, size) {
 		gl.drawArrays(gl.TRIANGLES, 0, this.triangles.length * 3);
 	}
 }
+
+
 
 function InitializeGame(resources_array) {
 

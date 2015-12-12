@@ -1,9 +1,10 @@
 function AudioHandler() {
 
-    this.init = function() {
+    this.init = function( resourceList ) {
         //Initialize whole handler, load requested resources
         this.audioData = new Array()
         this.initContext()
+        this.loadAudio( resourceList )
     }
     
     this.initContext = function() {
@@ -37,7 +38,6 @@ function AudioHandler() {
             }
             req.send();
         }
-        var request = XMLHttpRequest();
     }
     
     this.playSound( index ) {
