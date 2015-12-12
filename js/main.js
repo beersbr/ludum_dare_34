@@ -2,17 +2,25 @@ var game = {};
 var Canvas = null;
 var gl = null;
 
+var ProjectionMatrix = null;
+var ViewMatrix = null;
+
 var CurrentTime = 0.0;
 var ElapsedTime = 0.0;
-
-var resource = {};
 
 var Width = 1200;
 var Height = 800;
 
+var TileWidth = 40;
+var TileHeight = 40;
+
 var CurrentLevel = null;
 
 var Player = null;
+
+var GameObjects = [];
+
+var Resources = {};
 
 function GetRC(k) {
 	return Resources[k].item;
@@ -67,6 +75,10 @@ function LoadResources(resource_array) {
 	return p;
 }
 
+function CreateResourceTemplate(key, type, src){ 
+	return { type:type, key:key, src:src };
+}
+
 function CreateResource(key, type, item, src) {
 	src = src || null; 
 
@@ -89,6 +101,7 @@ function GameObject(position, size) {
 	this.acceleration = [0.0, 0.0];
 
 	this.polygon = [[-0.5, 0.5], [-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]];
+
 	this.bb = PolygonBoundingBox(this.polygon);
 	this.size = size.slice();
 
@@ -117,9 +130,11 @@ function GameObject(position, size) {
 		gl.useProgram(this.shader);
 		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
+
+		gl.uniformMatrix4fv(this.shader.uniforms["u_m4_projection"], false, ProjectionMatrix); 
+
 		var model = Matrix4.create();
 		model = Matrix4.translate(model, [this.position.x, this.position.y, 0.0]);
-
 		model = Matrix4.scale(model, [this.size.x, this.size.y, 1.0]);
 		
 		gl.uniformMatrix4fv(this.shader.uniforms["u_m4_model"], false, model); 
@@ -139,32 +154,65 @@ function GameObject(position, size) {
 	}
 }
 
-function InitializeGame() {
+function InitializeGame(resources_array) {
 	Canvas = document.getElementById("canvas");
 	Width = Canvas.width;
 	Height = Canvas.height;
 
 	gl = Canvas.getContext("webgl");
 
-	Setup()
+	ProjectionMatrix = Matrix4.ortho(0, Width, Height, 0, 0.1, 100);
+
+	LoadResources(resources_array).done(function(){
+		// function CreateResource(key, type, item, src)
+		// function CreateTexture(image_object, gl_mag_filter, gl_min_filter, flip)
+
+		var textureShader = CreateShaderProgram(GetRC("texture-shader-vs"), GetRC("texture-shader-fs"), 
+			["a_v2_uv", "a_v2_position"],
+			["u_f_time", "u_sampler2d_texture", "u_m4_model", "u_m4_view", "u_m4_projection"]);
+		CreateResource("texture-shader", "shader", textureShader, null);
+
+		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, true);
+		CreateResource("player-texture", "texture", GetRC("image-player"), GetRC("image-player"));
+
+		var BlueTexture = CreateTexture(GetRC("image-blue"), gl.NEAREST, gl.NEAREST, true);
+		CreateResource("tile-blue-texture", "texture", GetRC("image-blue"), GetRC("image-blue"));
+
+		Player = new GameObject([Width/2, Height/2], [GetRC("image-player").width/2, GetRC("image-player").height/2]);
+		Player.texture = playerTexture;
+		Player.shader = textureShader;
+		Player.prepare();
+
+		// GameObjects.push(Player);
+		BlueTile1 = new GameObject([0, Height-TileHeight], [TileWidth, TileHeight]);
+		BlueTile1.texture = GetRC("tile-blue-texture");
+		BlueTile1.shader = textureShader;
+		GameObjects.push(BlueTile1);
+
+		Setup();
+	});
 }
 
 function Setup(levels) { 
+
 	PrepareLevel();
-
-	
-
 }
 
 
-function PrepreLevel(id) {
-	
+function PrepareLevel(id) {
+	UpdateAndRender();
 }
 
 
 function UpdateAndRender() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	GameObjects.filter()
+
+	Player.render();
+
+
 
 	requestAnimFrame(UpdateAndRender);	
 }

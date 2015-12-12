@@ -9,8 +9,17 @@
 
 	<script type="text/javascript">
 	window.onload = function() {
-		InitializeGame();
-		UpdateAndRender();
+		var resources = [
+			CreateResourceTemplate("image-blue", "image", "images/bg_blue.png"),
+			CreateResourceTemplate("image-green", "image", "images/bg_green.png"),
+			CreateResourceTemplate("image-red", "image", "images/bg_red.png"),
+			CreateResourceTemplate("image-player", "image", "images/duck_outline_back.png"),
+			CreateResourceTemplate("texture-shader-vs", "text", "shaders/texture.vs.glsl"),
+			CreateResourceTemplate("texture-shader-fs", "text", "shaders/texture.fs.glsl"),
+		];
+
+		InitializeGame(resources);
+		// UpdateAndRender();
 	}
 	</script>
 

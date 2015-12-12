@@ -4,7 +4,7 @@ attribute vec2 a_v2_position;
 attribute vec2 a_v2_uv;
 
 uniform mat4 u_m4_projection;
-// uniform mat4 u_m4_view;
+uniform mat4 u_m4_view;
 uniform mat4 u_m4_model;
 
 varying vec2 o_v2_uv;
