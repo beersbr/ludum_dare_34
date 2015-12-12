@@ -1,130 +1,130 @@
 function bind(scope, fn)
 {
-    return (function(){
-        fn.apply(scope, arguments);
-    });
+	return (function(){
+		fn.apply(scope, arguments);
+	});
 }
 
 function MouseHandler(el){
-    this.keys = {};
-    this.mouseDown = {x: undefined, y: undefined};
-    this.mousePos = {x: undefined, y: undefined};
+	this.keys = {};
+	this.mouseDown = {x: undefined, y: undefined};
+	this.mousePos = {x: undefined, y: undefined};
 
-    this.mouseClick = undefined;
+	this.mouseClick = undefined;
 
-    this.clicked = function(){
-        var click = this.mouseClick;
-        this.mouseClick = undefined;
-        return click;
-    }
+	this.clicked = function(){
+		var click = this.mouseClick;
+		this.mouseClick = undefined;
+		return click;
+	}
 
-    this.MouseUp = function(event)
-    {
-        // event.stopPropagation();
-        // event.preventDefault();
-        // console.log("mouseup");
-    }
+	this.MouseUp = function(event)
+	{
+		// event.stopPropagation();
+		// event.preventDefault();
+		// console.log("mouseup");
+	}
 
-    this.MouseDown = function(event)
-    {
-        event.stopPropagation();
-        event.preventDefault();
+	this.MouseDown = function(event)
+	{
+		event.stopPropagation();
+		event.preventDefault();
 
-        this.mouseDown.x = event.offsetX;
-        this.mouseDown.y = event.offsetY;
-        // console.log("mousedown");
-    }
+		this.mouseDown.x = event.offsetX;
+		this.mouseDown.y = event.offsetY;
+		// console.log("mousedown");
+	}
 
-    this.MouseMove = function(e)
-    {
-        this.mousePos.x = e.x;
-        this.mousePos.y = e.y;
-    }
+	this.MouseMove = function(e)
+	{
+		this.mousePos.x = e.x;
+		this.mousePos.y = e.y;
+	}
 
-    this.MouseClick = function(e)
-    {
-        e.stopPropagation();
-        e.preventDefault();
+	this.MouseClick = function(e)
+	{
+		e.stopPropagation();
+		e.preventDefault();
 
-        this.mouseClick = {};
-        this.mouseClick.x = e.offsetX;
-        this.mouseClick.y = e.offsetY;
-    }
+		this.mouseClick = {};
+		this.mouseClick.x = e.offsetX;
+		this.mouseClick.y = e.offsetY;
+	}
 
-    // attach touch listeners
-    el.addEventListener("touchstart", bind(this, this.MouseUp));
-    el.addEventListener("touchend", bind(this, this.MouseDown));
+	// attach touch listeners
+	el.addEventListener("touchstart", bind(this, this.MouseUp));
+	el.addEventListener("touchend", bind(this, this.MouseDown));
 
-    // Attach mouse listeners
-    el.addEventListener("mouseup", bind(this, this.MouseUp));
-    el.addEventListener("mousedown", bind(this, this.MouseDown));
-    el.addEventListener("mousemove", bind(this, this.MouseMove));
-    el.addEventListener("click", bind(this, this.MouseClick));
+	// Attach mouse listeners
+	el.addEventListener("mouseup", bind(this, this.MouseUp));
+	el.addEventListener("mousedown", bind(this, this.MouseDown));
+	el.addEventListener("mousemove", bind(this, this.MouseMove));
+	el.addEventListener("click", bind(this, this.MouseClick));
 
-    // Attach keyboard listeners
-    // window.addEventListener("keyup", bind(this, this.KeyUp));
-    // window.addEventListener("keydown", bind(this, this.KeyDown));
+	// Attach keyboard listeners
+	// window.addEventListener("keyup", bind(this, this.KeyUp));
+	// window.addEventListener("keydown", bind(this, this.KeyDown));
 }
 
 function KeyboardHandler()
 {
-    this.setKey = function(key)
-    {
-        // If we are setting the key for the first time make sure it has a value
-        if(this.keyStates[key.keyCode] == null) this.keyStates[key.keyCode] = false;
-        this.keyStates[key.keyCode] = true;
-        return true;
-    }
+	this.setKey = function(key)
+	{
+		// If we are setting the key for the first time make sure it has a value
+		if(this.keyStates[key.keyCode] == null) this.keyStates[key.keyCode] = false;
+		this.keyStates[key.keyCode] = true;
+		return true;
+	}
 
-    // unsets the key in the buffer variable
-    this.unsetKey = function(key)
-    {
-        this.keyStates[key.keyCode] = false;
-        this.pressed_keys[key.keyCode] = true;
+	// unsets the key in the buffer variable
+	this.unsetKey = function(key)
+	{
+		this.keyStates[key.keyCode] = false;
+		this.pressed_keys[key.keyCode] = true;
 
-        return true;
-    }
+		return true;
+	}
 
-    // This is just a getter to make the later syntax easier to read through
-    this.key = function(key_value)
-    {
-        if(this.keyStates[key_value]) return true;
-        return false;
-    }
+	// This is just a getter to make the later syntax easier to read through
+	this.key = function(key_value)
+	{
+		if(this.keyStates[key_value]) return true;
+		return false;
+	}
 
-    this.keyIsDown = function(letter)
-    {
-        if(this.keyStates[keyHash[letter]]) return true;
-        return false;
-    }
+	this.keyIsDown = function(letter)
+	{
+		if(this.keyStates[keyHash[letter]]) return true;
+		return false;
+	}
 
-    this.keyPressed = function(letter)
-    {
-        return this.pressed_keys[keyHash[letter]];
-    }
+	this.keyPressed = function(letter)
+	{
+		return this.pressed_keys[keyHash[letter]];
+	}
 
-    this.setKeyPressed = function(letter)
-    {
-        // console.log(letter);
-    }
+	this.setKeyPressed = function(letter)
+	{
+		// console.log(letter);
+	}
 
-    this.cleaner = function()
-    {
-        this.pressed_keys = {};
-    }
+	this.cleaner = function()
+	{
+		this.pressed_keys = {};
+	}
 
-    this.listenOffsetX = 0;
-    this.listenOffsetY = 0;
-    this.mx = 0;
-    this.my = 0;
+	this.listenOffsetX = 0;
+	this.listenOffsetY = 0;
+	this.mx = 0;
+	this.my = 0;
 
-    this.pressed_keys = {};
-    this.keyStates = {};
+	this.pressed_keys = {};
+	this.keyStates = {};
 
-    var keyHash = {'backspace': 8,'tab': 9,'enter': 13,'shift': 16,'ctrl': 17,'alt': 18,'pause_break': 19,'caps_lock': 20,'escape': 27,'page_up': 33,'page_down': 34,'end': 35,'home': 36,'left_arrow': 37,'up_arrow': 38,'right_arrow': 39,'down_arrow': 40,'insert': 45,'delete': 46,'0': 48,'1': 49,'2': 50,'3': 51,'4': 52,'5': 53,'6': 54,'7': 55,'8': 56,'9': 57,'a': 65,'b': 66,'c': 67,'d': 68,'e': 69,'f': 70,'g': 71,'h': 72,'i': 73,'j': 74,'k': 75,'l': 76,'m': 77,'n': 78,'o': 79,'p': 80,'q': 81,'r': 82,'s': 83,'t': 84,'u': 85,'v': 86,'w': 87,'x': 88,'y': 89,'z': 90,'left_window_key': 91,'right_window_key': 92,'select_key': 93,'numpad_0': 96,'numpad_1': 97,'numpad_2': 98,'numpad_3': 99,'numpad_4': 100,'numpad_5': 101,'numpad_6': 102,'numpad_7': 103,'numpad_8': 104,'numpad_9': 105,'multiply': 106,'add': 107,'subtract': 109,'decimal_point': 110,'divide': 111,'f1': 112,'f2': 113,'f3': 114,'f4': 115,'f5': 116,'f6': 117,'f7': 118,'f8': 119,'f9': 120,'f10': 121,'f11': 122,'f12': 123,'num_lock': 144,'scroll_lock': 145,'semi_colon': 186,'equal_sign': 187,'comma': 188,'dash': 189,'period': 190,'forward_slash': 191,'grave_accent': 192,'open_bracket': 219,'back_slash': 220,'close_braket': 221,'single_quote': 222};
-    window.addEventListener("keydown", bind(this, this.setKey), false);
-    window.addEventListener("keyup", bind(this, this.unsetKey), false);
-    window.addEventListener("keypress", bind(this, this.setKeyPressed), false);
+	var keyHash = {'backspace': 8,'tab': 9,'enter': 13,'shift': 16,'ctrl': 17,'alt': 18,'pause_break': 19,'caps_lock': 20,'escape': 27,'page_up': 33,'page_down': 34,'end': 35,'home': 36,'left_arrow': 37,'up_arrow': 38,'right_arrow': 39,'down_arrow': 40,'insert': 45,'delete': 46,'0': 48,'1': 49,'2': 50,'3': 51,'4': 52,'5': 53,'6': 54,'7': 55,'8': 56,'9': 57,'a': 65,'b': 66,'c': 67,'d': 68,'e': 69,'f': 70,'g': 71,'h': 72,'i': 73,'j': 74,'k': 75,'l': 76,'m': 77,'n': 78,'o': 79,'p': 80,'q': 81,'r': 82,'s': 83,'t': 84,'u': 85,'v': 86,'w': 87,'x': 88,'y': 89,'z': 90,'left_window_key': 91,'right_window_key': 92,'select_key': 93,'numpad_0': 96,'numpad_1': 97,'numpad_2': 98,'numpad_3': 99,'numpad_4': 100,'numpad_5': 101,'numpad_6': 102,'numpad_7': 103,'numpad_8': 104,'numpad_9': 105,'multiply': 106,'add': 107,'subtract': 109,'decimal_point': 110,'divide': 111,'f1': 112,'f2': 113,'f3': 114,'f4': 115,'f5': 116,'f6': 117,'f7': 118,'f8': 119,'f9': 120,'f10': 121,'f11': 122,'f12': 123,'num_lock': 144,'scroll_lock': 145,'semi_colon': 186,'equal_sign': 187,'comma': 188,'dash': 189,'period': 190,'forward_slash': 191,'grave_accent': 192,'open_bracket': 219,'back_slash': 220,'close_braket': 221,'single_quote': 222};
+	window.addEventListener("keydown", bind(this, this.setKey), false);
+	window.addEventListener("keyup", bind(this, this.unsetKey), false);
+	window.addEventListener("keypress", bind(this, this.setKeyPressed), false);
 
 }
 
@@ -183,8 +183,8 @@ function Promise() {
 }
 
 function getType(o){
-    if(o===null)return "[object Null]"; // special case
-    return Object.prototype.toString.call(o);
+	if(o===null)return "[object Null]"; // special case
+	return Object.prototype.toString.call(o);
 }
 
 Object.clone = function(o) {
@@ -483,6 +483,86 @@ Matrix4.perspective = function(fovy, aspect, near, far) {
 			 0, 0, (2.0*far*near)*r, 0]);
 }
 
+Matrix4.lookAt = function(v3_eye, v3_center, v3_up) {
+
+	var x0, x1, x2, y0, y1, y2, z0, z1, z2, len,
+		eyex = v3_eye[0],
+		eyey = v3_eye[1],
+		eyez = v3_eye[2],
+		upx = v3_up[0],
+		upy = v3_up[1],
+		upz = v3_up[2],
+		centerx = v3_center[0],
+		centery = v3_center[1],
+		centerz = v3_center[2];
+
+	if (Math.abs(eyex - centerx) < 0.000001 &&
+		Math.abs(eyey - centery) < 0.000001 &&
+		Math.abs(eyez - centerz) < 0.000001) {
+		return Matrix4.create();
+	}
+
+	z0 = eyex - centerx;
+	z1 = eyey - centery;
+	z2 = eyez - centerz;
+
+	len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
+	z0 *= len;
+	z1 *= len;
+	z2 *= len;
+
+	x0 = upy * z2 - upz * z1;
+	x1 = upz * z0 - upx * z2;
+	x2 = upx * z1 - upy * z0;
+	len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+	if (!len) {
+		x0 = 0;
+		x1 = 0;
+		x2 = 0;
+	} else {
+		len = 1 / len;
+		x0 *= len;
+		x1 *= len;
+		x2 *= len;
+	}
+
+	y0 = z1 * x2 - z2 * x1;
+	y1 = z2 * x0 - z0 * x2;
+	y2 = z0 * x1 - z1 * x0;
+
+	len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+	if (!len) {
+		y0 = 0;
+		y1 = 0;
+		y2 = 0;
+	} else {
+		len = 1 / len;
+		y0 *= len;
+		y1 *= len;
+		y2 *= len;
+	}
+
+	var d = [];
+	d[0] = x0;
+	d[1] = y0;
+	d[2] = z0;
+	d[3] = 0;
+	d[4] = x1;
+	d[5] = y1;
+	d[6] = z1;
+	d[7] = 0;
+	d[8] = x2;
+	d[9] = y2;
+	d[10] = z2;
+	d[11] = 0;
+	d[12] = -(x0 * eyex + x1 * eyey + x2 * eyez);
+	d[13] = -(y0 * eyex + y1 * eyey + y2 * eyez);
+	d[14] = -(z0 * eyex + z1 * eyey + z2 * eyez);
+	d[15] = 1;
+
+	return d;
+}
+
 Matrix4.scale = function(m, v3) {
 	d = [];
 	d[0] = m[0]*v3.x;
@@ -506,27 +586,27 @@ Matrix4.scale = function(m, v3) {
 
 Matrix4.translate = function(m, v3) {
 	var x = v3[0], y = v3[1], z = v3[2],
-        a00, a01, a02, a03,
-        a10, a11, a12, a13,
-        a20, a21, a22, a23;
+		a00, a01, a02, a03,
+		a10, a11, a12, a13,
+		a20, a21, a22, a23;
 
-     var d = [];
+	 var d = [];
 
-    a00 = m[0]; a01 = m[1]; a02 = m[2]; a03 = m[3];
-    a10 = m[4]; a11 = m[5]; a12 = m[6]; a13 = m[7];
-    a20 = m[8]; a21 = m[9]; a22 = m[10]; a23 = m[11];
+	a00 = m[0]; a01 = m[1]; a02 = m[2]; a03 = m[3];
+	a10 = m[4]; a11 = m[5]; a12 = m[6]; a13 = m[7];
+	a20 = m[8]; a21 = m[9]; a22 = m[10]; a23 = m[11];
 
-    d[0] = a00; d[1] = a01; d[2] = a02; d[3] = a03;
-    d[4] = a10; d[5] = a11; d[6] = a12; d[7] = a13;
-    d[8] = a20; d[9] = a21; d[10] = a22; d[11] = a23;
+	d[0] = a00; d[1] = a01; d[2] = a02; d[3] = a03;
+	d[4] = a10; d[5] = a11; d[6] = a12; d[7] = a13;
+	d[8] = a20; d[9] = a21; d[10] = a22; d[11] = a23;
 
-    d[12] = a00 * x + a10 * y + a20 * z + m[12];
-    d[13] = a01 * x + a11 * y + a21 * z + m[13];
-    d[14] = a02 * x + a12 * y + a22 * z + m[14];
-    d[15] = a03 * x + a13 * y + a23 * z + m[15];
+	d[12] = a00 * x + a10 * y + a20 * z + m[12];
+	d[13] = a01 * x + a11 * y + a21 * z + m[13];
+	d[14] = a02 * x + a12 * y + a22 * z + m[14];
+	d[15] = a03 * x + a13 * y + a23 * z + m[15];
 
 
-    return d;
+	return d;
 }
 
 Matrix4.rotate = function(m, v3) {

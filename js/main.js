@@ -5,6 +5,8 @@ var gl = null;
 var ProjectionMatrix = null;
 var ViewMatrix = null;
 
+var Camera = [];
+
 var CurrentTime = 0.0;
 var ElapsedTime = 0.0;
 
@@ -164,6 +166,7 @@ function GameObject(position, size) {
 
 
 		gl.uniformMatrix4fv(this.shader.uniforms["u_m4_projection"], false, ProjectionMatrix); 
+		gl.uniformMatrix4fv(this.shader.uniforms["u_m4_view"], false, ViewMatrix);
 
 		var model = Matrix4.create();
 		model = Matrix4.translate(model, [this.position.x, this.position.y, 0.0]);
@@ -200,6 +203,14 @@ function InitializeGame(resources_array) {
 	gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
 	ProjectionMatrix = Matrix4.ortho(0, Width, Height, 0, 0.1, 100);
+	Camera = [
+		[0.0, 0.0, 0.0],
+		[0.0, 0.0, -1.0],
+		[0.0, 1.0, 0.0]
+	];
+
+	ViewMatrix = Matrix4.lookAt(Camera.x, Camera.y, Camera.z);
+
 
 	LoadResources(resources_array).done(function(){
 		// function CreateResource(key, type, item, src)
@@ -312,10 +323,13 @@ function UpdateAndRender() {
 	Player.velocity = Vector2.scale(Player.velocity, drag);
 	Player.position = Vector2.add(Player.position, Player.velocity);
 	
-
-
 	Player.acceleration = [0, 0];
 	Player.update();
+
+	var cameraDelta = Vector3.scale(Vector3.sub([Player.position.x-Width/2, Player.position.y-(Height*(3/5)), 0], Camera[0]), 0.05);
+	Camera[0] = Vector3.add(Camera[0], cameraDelta);
+	Camera[1] = [Camera[0].x, Camera[0].y, -1];
+	ViewMatrix = Matrix4.lookAt(Camera[0], Camera[1], Camera[2]);
 
 	GameObjectsStatic.forEach(function(c){
 		var cresult = SATCollision(Player.scaledPolygon, c.scaledPolygon);
