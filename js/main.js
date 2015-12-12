@@ -185,7 +185,7 @@ function GameObject(position, size) {
 	}
 }
 
-function InitializeGame() {
+function InitializeGame(resources_array) {
 
 	Canvas = document.getElementById("canvas");
 	Width = Canvas.width;
@@ -257,16 +257,19 @@ function UpdateAndRender() {
 		Player.acceleration.x = power;
 	}
 	if(KEYBOARD.keyIsDown("w")) {
-		Player.acceleration.y = -power;
+		Player.acceleration.y = -power*4;
 	}
 	if(KEYBOARD.keyIsDown("s")) {
 		Player.acceleration.y = power;
 	}
 
+	Player.acceleration = Vector2.add(Player.acceleration, [0, 1.5]);
 	Player.velocity = Vector2.add(Player.velocity, Player.acceleration);
 	Player.velocity = Vector2.scale(Player.velocity, drag);
 	Player.position = Vector2.add(Player.position, Player.velocity);
 	
+
+
 	Player.acceleration = [0, 0];
 	Player.update();
 
