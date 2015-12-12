@@ -213,26 +213,58 @@ function InitializeGame(resources_array) {
 		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, true);
 		CreateResource("player-texture", "texture", GetRC("image-player"), GetRC("image-player"));
 
-		var BlueTexture = CreateTexture(GetRC("image-blue"), gl.NEAREST, gl.NEAREST, true);
-		CreateResource("tile-blue-texture", "texture", BlueTexture, GetRC("image-blue"));
-
 		Player = new GameObject([Width/2, Height/2], [80, 80]);
 		Player.texture = playerTexture;
 		Player.shader = textureShader;
+		Player.shortJumpTimer = 100; //ms
+		Player.highJumpTimer = 140;
+
+		Player.currentJumpTime = 0.0;
+
 		Player.prepare();
 
-		// GameObjects.push(Player);
-		BlueTile1 = new GameObject([TileWidth*30/2, Height-TileHeight/2], [TileWidth*30, TileHeight]);
-		BlueTile1.texture = GetRC("tile-blue-texture");
-		BlueTile1.shader = textureShader;
-		BlueTile1.prepare();
-		GameObjectsStatic.push(BlueTile1);
+		var mapJson = GetRC("stage-1-1");
+		var levelImages = mapJson.images.map(function(c){
+			return CreateResourceTemplate(c.key, "image", c.src);
+		})
 
-		Setup();
+		LoadResources(levelImages).done(function() {
+			mapJson.textures.forEach(function(c) {
+				var t = CreateTexture(GetRC(c.src), gl.NEAREST, gl.NEAREST, true);
+				CreateResource(c.key, "texture", t, GetRC(c.src));
+			});
+
+			mapJson.objects.forEach(function(c){
+				var obj = new GameObject([c.position.x+c.size.x/2, Height-c.position.y + c.size.y/2], c.size);
+				obj.shader = textureShader;
+				obj.texture = GetRC(c.texture);
+				obj.prepare();
+				if(c.static) {
+					GameObjectsStatic.push(obj);
+				}
+			});
+
+			Setup();
+		})
+
+		// var BlueTexture = CreateTexture(GetRC("image-blue"), gl.NEAREST, gl.NEAREST, true);
+		// CreateResource("tile-blue-texture", "texture", BlueTexture, GetRC("image-blue"));
+
+		// // GameObjects.push(Player);
+		// BlueTile1 = new GameObject([TileWidth*30/2, Height-TileHeight/2], [TileWidth*30, TileHeight]);
+		// BlueTile1.texture = GetRC("tile-blue-texture");
+		// BlueTile1.shader = textureShader;
+		// BlueTile1.prepare();
+		// GameObjectsStatic.push(BlueTile1);
+
+		// Setup();
 	});
 }
 
 function Setup(levels) { 
+
+	CurrentTime = +new Date();
+	ElapsedTime = 0.0;
 
 	PrepareLevel();
 }
@@ -244,6 +276,10 @@ function PrepareLevel(id) {
 
 
 function UpdateAndRender() {
+	var oldTime = CurrentTime;
+	CurrentTime = +new Date();
+	var frameTime = CurrentTime - oldTime;
+
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -257,13 +293,21 @@ function UpdateAndRender() {
 		Player.acceleration.x = power;
 	}
 	if(KEYBOARD.keyIsDown("w")) {
-		Player.acceleration.y = -power*4;
+		Player.currentJumpTime += frameTime;
+
+		if(Player.currentJumpTime < Player.shortJumpTimer)
+			Player.acceleration.y = -power*6;
+		else if(Player.currentJumpTime < Player.highJumpTimer 
+			&& Player.currentJumpTime > Player.shortJumpTimer) {
+			Player.acceleration.y = -power*4;
+		}
 	}
 	if(KEYBOARD.keyIsDown("s")) {
 		Player.acceleration.y = power;
 	}
 
-	Player.acceleration = Vector2.add(Player.acceleration, [0, 1.5]);
+	Player.acceleration = Vector2.add(Player.acceleration, [0, 3]);
+
 	Player.velocity = Vector2.add(Player.velocity, Player.acceleration);
 	Player.velocity = Vector2.scale(Player.velocity, drag);
 	Player.position = Vector2.add(Player.position, Player.velocity);
@@ -277,6 +321,11 @@ function UpdateAndRender() {
 		var cresult = SATCollision(Player.scaledPolygon, c.scaledPolygon);
 		if(cresult) {
 			Player.position = Vector2.add(Player.position, Vector2.scale(cresult[0], cresult[1]));
+
+			if(cresult[0].y < 0 && Math.abs(cresult[0].y) > Math.abs(cresult[0].x)) {
+				
+				Player.currentJumpTime = 0.0;
+			}
 		}
 		c.render();
 	});
