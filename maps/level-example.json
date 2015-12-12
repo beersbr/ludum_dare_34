@@ -1,0 +1,4 @@
+{
+	"level_id": 1,				// Unique Identifier of the level
+	"stages": [1, 2, 3, 4]		// Array of stage_id's associated with this level
+}

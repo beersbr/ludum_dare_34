@@ -1,7 +1,6 @@
-{
-	"id": 1,		// Unique Map Id
-	"level": 1,		// Level id (contains a number of stages)
-	"stage": 1,		// Stage id (sub section of a level)
+{	/* File name: stage-[level_id]-[stage_id] (ex: stage-2-3)  */
+	"level_id": 1,					// Level id (each level contains a number of stages)
+	"stage_id": 1,					// Stage id (id of the sub section of a level)
 	"structure": [
 		{
 			"src": "",			// Source that loaded the object [Generated]
