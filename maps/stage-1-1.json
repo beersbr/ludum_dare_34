@@ -33,21 +33,42 @@
 		{
 			"shader": "default",
 			"texture": "tile-green-texture",
-			"position": [192,192],
+			"position": [448,512],
+			"size": [384,64],
+			"static": true
+		},
+		{
+			"shader": "default",
+			"texture": "tile-green-texture",
+			"position": [320,192],
+			"size": [128,64],
+			"static": true
+		},
+		{
+			"shader": "default",
+			"texture": "tile-green-texture",
+			"position": [128,384],
+			"size": [196,64],
+			"static": true
+		},
+		{
+			"shader": "default",
+			"texture": "tile-green-texture",
+			"position": [448,256],
 			"size": [64,64],
 			"static": true
 		},
 		{
 			"shader": "default",
 			"texture": "tile-green-texture",
-			"position": [192,768],
+			"position": [768,192],
 			"size": [64,64],
 			"static": true
 		},
 		{
 			"shader": "default",
 			"texture": "tile-green-texture",
-			"position": [192,1152],
+			"position": [1024,196],
 			"size": [64,64],
 			"static": true
 		}
