@@ -1,0 +1,16 @@
+{
+	"id": 1,		// Unique Map Id
+	"level": 1,		// Level id (contains a number of stages)
+	"stage": 1,		// Stage id (sub section of a level)
+	"structure": [
+		{
+			"src": "",			// Source that loaded the object [Generated]
+			"key": "",			// Unique identifier to the chunk
+			"type": "",			// Type of object (texture, sound, text, image, shader)
+			"item": "",			// Reference to content of the chunk
+			"created": 0,		// Date map was loaded (unix timestamp) [Generated]
+			"id": "",			// Id of chunk
+			"position": [0,0]	// Top left coordinates of chunk in stage [x,y]
+		}
+	]
+}
