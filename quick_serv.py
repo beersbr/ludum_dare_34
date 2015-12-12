@@ -8,7 +8,17 @@ import sys
 import BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
-HandlerClass = SimpleHTTPRequestHandler
+class CustomHTTPReqHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.sendContentHeader()
+        SimpleHTTPRequestHandler.end_headers(self)
+
+    def sendContentHeader(self):
+        if '.json' in self.path:
+            self.send_header('Content-Type', 'application/json')
+        self.send_header("Access-Control-Allow-Origin", "*")
+
+HandlerClass = CustomHTTPReqHandler
 ServerClass = BaseHTTPServer.HTTPServer
 Proto = "HTTP/1.0"
 
