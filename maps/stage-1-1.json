@@ -1,0 +1,55 @@
+{
+	"level_id": 1,
+	"stage_id": 1,
+	"images":[
+		{
+			"key": "image-blue",
+			"src": "images/bg_blue.png"
+		},
+		{
+			"key": "image-green",
+			"src": "images/bg_green.png"
+		}
+	],
+	"textures":[
+		{
+			"key": "tile-blue-texture",
+			"src": "image-blue"
+		},
+		{
+			"key": "tile-green-texture",
+			"src": "image-green"
+		}
+	],
+	"sounds":[],
+	"objects": [
+		{
+			"shader": "default",
+			"texture": "tile-blue-texture",
+			"position": [0,40],
+			"size": [1600,40],
+			"static": true
+		},
+		{
+			"shader": "default",
+			"texture": "tile-green-texture",
+			"position": [120,120],
+			"size": [40,40],
+			"static": true
+		},
+		{
+			"shader": "default",
+			"texture": "tile-green-texture",
+			"position": [120,480],
+			"size": [40,40],
+			"static": true
+		},
+		{
+			"shader": "default",
+			"texture": "tile-green-texture",
+			"position": [120,720],
+			"size": [40,40],
+			"static": true
+		}
+	]
+}
