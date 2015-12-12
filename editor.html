@@ -19,9 +19,9 @@
 	var stageObject = {"level_id":0,"stage_id":0,"images":[],"textures":[],"sounds":[],"objects":[]}
 
 	function buildGrid() {
-		for(y = 0; y <= 400; y = y + 32) {
+		for(y = 416; y >= 0; y = y - 32) {
 			for(x = 0; x <= 600; x = x + 32) {
-				$("#grid").append("<div class='square' data-x='"+x+"' data-y='"+y+"'></div>");
+				$("#grid").append("<div class='square' data-x='"+(x*2)+"' data-y='"+(y*2)+"'></div>");
 			}
 			$("#grid").append("<div class='clear'></div>");
 		}
