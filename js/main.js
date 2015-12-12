@@ -26,6 +26,29 @@ function GetRC(k) {
 	return Resources[k].item;
 }
 
+function GetDefaultResources() {
+
+	var resources = [
+		CreateResourceTemplate("image-player", "image", "images/duck_outline_back.png"),
+		CreateResourceTemplate("texture-shader-vs", "text", "shaders/texture.vs.glsl"),
+		CreateResourceTemplate("texture-shader-fs", "text", "shaders/texture.fs.glsl")
+	];
+
+	return resources;
+}
+
+function GetStageResources(levelId, stageId) {
+	var stagePath = "maps/stage-{1}-{2}.json".format(levelId, stageId);
+	var resources = []
+	$.get(stagePath).done(function(result){ 
+		result.images.foreach(function(imageObj){
+			resources.push(CreateResourceTemplate(imageObj.key, "image", imageObj.src));
+		})
+	});
+
+	return resources;
+}
+
 function LoadResources(resource_array) { 
 	var p = new Promise();
 	
@@ -162,10 +185,15 @@ function GameObject(position, size) {
 	}
 }
 
-function InitializeGame(resources_array) {
+function InitializeGame() {
+
 	Canvas = document.getElementById("canvas");
 	Width = Canvas.width;
 	Height = Canvas.height;
+
+	resource_array = GetDefaultResources();
+
+	//var stages = LoadLevelStages(1);
 
 	gl = Canvas.getContext("webgl");
 	gl.enable(gl.BLEND);
