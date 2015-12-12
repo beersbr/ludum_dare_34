@@ -228,13 +228,15 @@ function InitializeGame(resources_array) {
 		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, true);
 		CreateResource("player-texture", "texture", GetRC("image-player"), GetRC("image-player"));
 
-		Player = new GameObject([Width/2, Height/2], [80, 80]);
+		Player = new GameObject([Width/2, Height/2], [64, 64]);
 		Player.texture = playerTexture;
 		Player.shader = textureShader;
-		Player.shortJumpTimer = 100; //ms
-		Player.highJumpTimer = 140;
-
-		Player.currentJumpTime = 0.0;
+		Player.shortJumpTime = 100; //ms
+		Player.highJumpTime = 140;
+		Player.jumpTime = 0.0;
+		Player.isJumping = false;
+		Player.onGround = false;
+		
 
 		Player.prepare();
 
@@ -298,8 +300,9 @@ function UpdateAndRender() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	var power = 1.8;
+	var power = 150;
 	var drag = 0.83;
+	var gravity = [0, 120];
 
 	if(KEYBOARD.keyIsDown("a")) {
 		Player.acceleration.x = -power;
@@ -308,29 +311,42 @@ function UpdateAndRender() {
 		Player.acceleration.x = power;
 	}
 	if(KEYBOARD.keyIsDown("w")) {
-		Player.currentJumpTime += frameTime;
-
-		if(Player.currentJumpTime < Player.shortJumpTimer)
-			Player.acceleration.y = -power*6;
-		else if(Player.currentJumpTime < Player.highJumpTimer 
-			&& Player.currentJumpTime > Player.shortJumpTimer) {
-			Player.acceleration.y = -power*4;
+		if(Player.onGround) {
+			Player.isJumping = true;
+			Player.onGround = false;
 		}
 	}
+	else {
+		Player.isJumping = false;
+		Player.jumpTime = 0.0;
+	}
+
 	if(KEYBOARD.keyIsDown("s")) {
 		Player.acceleration.y = power;
 	}
 
-	Player.acceleration = Vector2.add(Player.acceleration, [0, 3]);
+	if(Player.isJumping) {
+		Player.jumpTime += frameTime;
+		
+		if(Player.jumpTime < Player.shortJumpTime) {
+			Player.acceleration.y -= power*4;
+		}
+		else if(Player.jumpTime < Player.highJumpTime) {
+			Player.acceleration.y -= power*3;
+		}
+	}
+
+	// NOTE(Brett): gravity
+	Player.acceleration = Vector2.add(Player.acceleration, gravity);
 
 	Player.velocity = Vector2.add(Player.velocity, Player.acceleration);
 	Player.velocity = Vector2.scale(Player.velocity, drag);
-	Player.position = Vector2.add(Player.position, Player.velocity);
+	Player.position = Vector2.add(Player.position, Vector2.scale(Player.velocity, frameTime/1000));
 	
 	Player.acceleration = [0, 0];
 	Player.update();
 
-	var cameraDelta = Vector3.scale(Vector3.sub([Player.position.x-Width/2, Player.position.y-(Height*(3/5)), 0], Camera[0]), 0.05);
+	var cameraDelta = Vector3.scale(Vector3.sub([Player.position.x-Width/2, Player.position.y-(Height*(5/7)), 0], Camera[0]), 0.05);
 	Camera[0] = Vector3.add(Camera[0], cameraDelta);
 	Camera[1] = [Camera[0].x, Camera[0].y, -1];
 	ViewMatrix = Matrix4.lookAt(Camera[0], Camera[1], Camera[2]);
@@ -341,8 +357,10 @@ function UpdateAndRender() {
 			Player.position = Vector2.add(Player.position, Vector2.scale(cresult[0], cresult[1]));
 
 			if(cresult[0].y < 0 && Math.abs(cresult[0].y) > Math.abs(cresult[0].x)) {
-				
-				Player.currentJumpTime = 0.0;
+				Player.onGround = true;
+			}
+			else {
+				Player.onGround = false;
 			}
 		}
 		c.render();

@@ -32,6 +32,13 @@
 		},
 		{
 			"shader": "default",
+			"texture": "tile-blue-texture",
+			"position": [512,512],
+			"size": [64,512],
+			"static": true
+		},
+		{
+			"shader": "default",
 			"texture": "tile-green-texture",
 			"position": [448,512],
 			"size": [384,64],
