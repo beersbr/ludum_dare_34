@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ludum Dare 34 - Level Editor</title>
+	<style>
+		#grid { float:left; position: relative; }
+		.square { border:1px solid #000; float:left; height:32px; width:32px; }
+		.clear { float:left; clear:both; }
+		#output-wrap { float:left; }
+		#output { float:left; height: 400px; position: relative; width:400px; margin-left:10px; }
+		#generate { clear:both; float:left; position: relative; margin:10px; }
+	</style>
+	<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" src="js/bretter.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
+
+
+	<script type="text/javascript">
+	function buildGrid() {
+		for(y = 0; y <= 400; y = y + 32) {
+			for(x = 0; x <= 600; x = x + 32) {
+				$("#grid").append("<div class='square'></div>");
+			}
+			$("#grid").append("<div class='clear'></div>");
+		}
+	}
+
+	function generate() {
+
+	}
+
+	window.onload = function() {
+		buildGrid()
+	}
+	</script>
+
+</head>
+<body>
+	<div id="grid"></div>
+	<div id="output-wrap">
+		<textarea id="output"></textarea>	
+		<input id="generate" type="button" value="Generate" onclick="generate()">
+	</div>
+</body>
+</html>
