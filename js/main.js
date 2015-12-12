@@ -6,6 +6,11 @@ var ElapsedTime = 0.0;
 
 var resource = {};
 
+var Width = 1200;
+var Height = 800;
+
+var CurrentLevel = null;
+
 
 
 function GetRC(k) {
@@ -108,7 +113,6 @@ function GameObject(position, size) {
 	}
 
 	this.render = function() {
-
 		gl.useProgram(this.shader);
 		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
@@ -132,4 +136,19 @@ function GameObject(position, size) {
 
 		gl.drawArrays(gl.TRIANGLES, 0, this.triangles.length * 3);
 	}
+}
+
+
+function Setup(levels) { 
+
+}
+
+
+function prepreLevel(id) {
+
+}
+
+
+function UpdateAndRender() {
+
 }
