@@ -7,8 +7,7 @@
 		.square { border:1px solid #000; float:left; height:32px; width:32px; }
 		.clear { float:left; clear:both; }
 		#output-wrap { float:left; }
-		#output { float:left; height: 400px; position: relative; width:400px; margin-left:10px; }
-		#generate { clear:both; float:left; position: relative; margin:10px; }
+		#output { float:left; height: 440px; position: relative; width:640px; margin-left:10px; }
 	</style>
 	<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript" src="js/bretter.js"></script>
@@ -16,13 +15,26 @@
 
 
 	<script type="text/javascript">
+
+	var stageObject = {"level_id":0,"stage_id":0,"images":[],"textures":[],"sounds":[],"objects":[]}
+
 	function buildGrid() {
 		for(y = 0; y <= 400; y = y + 32) {
 			for(x = 0; x <= 600; x = x + 32) {
-				$("#grid").append("<div class='square'></div>");
+				$("#grid").append("<div class='square' data-x='"+x+"' data-y='"+y+"'></div>");
 			}
 			$("#grid").append("<div class='clear'></div>");
 		}
+		$(".square").click(function() {
+			stageObject.objects.push({
+				"shader": "default",
+				"texture": "tile-blue-texture",
+				"position": [$(this).data("x"),$(this).data("y")],
+				"size": [64,64],
+				"static": true
+			})
+			$("#output").val(JSON.stringify(stageObject))
+		});
 	}
 
 	function generate() {
@@ -31,6 +43,7 @@
 
 	window.onload = function() {
 		buildGrid()
+		$("#output").val(JSON.stringify(stageObject))
 	}
 	</script>
 
@@ -39,7 +52,6 @@
 	<div id="grid"></div>
 	<div id="output-wrap">
 		<textarea id="output"></textarea>	
-		<input id="generate" type="button" value="Generate" onclick="generate()">
 	</div>
 </body>
 </html>
