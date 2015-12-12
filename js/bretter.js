@@ -608,7 +608,7 @@ function SATCollision(polygonA, polygonB)
 	for(var i = 0; i < polygonA.length; ++i)
 	{
 		var axis = Vector2.unit(Vector2.subtract(polygonA[(i+1)%polygonA.length], polygonA[i]));
-		axis = [axis.y,-axis.x];
+		axis = [axis.y, -axis.x];
 
 		var pa = ProjectPolygonOnAxis2D(polygonA, axis);
 		var pb = ProjectPolygonOnAxis2D(polygonB, axis);
@@ -709,8 +709,8 @@ function CreateTexture(image_object, gl_mag_filter, gl_min_filter, flip) {
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image_object);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl_mag_filter);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl_min_filter);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 	gl.bindTexture(gl.TEXTURE_2D, null);
 
 	return texture;

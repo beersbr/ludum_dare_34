@@ -18,7 +18,7 @@ var CurrentLevel = null;
 
 var Player = null;
 
-var GameObjects = [];
+var GameObjectsStatic = [];
 
 var Resources = {};
 
@@ -101,6 +101,7 @@ function GameObject(position, size) {
 	this.acceleration = [0.0, 0.0];
 
 	this.polygon = [[-0.5, 0.5], [-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]];
+	this.scaledPolygon = null;
 
 	this.bb = PolygonBoundingBox(this.polygon);
 	this.size = size.slice();
@@ -110,6 +111,12 @@ function GameObject(position, size) {
 	this.vbo = null;
 	this.texture = null;
 	this.shader = null;
+
+	this.update = function() {
+		this.scaledPolygon = this.polygon.map(function(c){ 
+			return Vector2.add(Vector2.multiply(c, self.size), self.position);
+		});
+	}
 
 	this.prepare = function() {
 		this.geometry = TriangulateConvexPolygon(this.polygon.slice());
@@ -124,6 +131,8 @@ function GameObject(position, size) {
 		this.vbo = gl.createBuffer(gl.ARRAY_BUFFER);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.geometry), gl.STATIC_DRAW);
+
+		this.update();
 	}
 
 	this.render = function() {
@@ -139,7 +148,6 @@ function GameObject(position, size) {
 		
 		gl.uniformMatrix4fv(this.shader.uniforms["u_m4_model"], false, model); 
 		gl.uniform1i(this.shader.uniforms["u_sampler2d_texture"], 0);
-		
 
 		// TODO(brett): this can be moved to a texture starter and stopper
 
@@ -160,6 +168,8 @@ function InitializeGame(resources_array) {
 	Height = Canvas.height;
 
 	gl = Canvas.getContext("webgl");
+	gl.enable(gl.BLEND);
+	gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
 	ProjectionMatrix = Matrix4.ortho(0, Width, Height, 0, 0.1, 100);
 
@@ -169,25 +179,26 @@ function InitializeGame(resources_array) {
 
 		var textureShader = CreateShaderProgram(GetRC("texture-shader-vs"), GetRC("texture-shader-fs"), 
 			["a_v2_uv", "a_v2_position"],
-			["u_f_time", "u_sampler2d_texture", "u_m4_model", "u_m4_view", "u_m4_projection"]);
+			["u_f_time", "u_sampler2d_texture", "u_m4_model", "u_m4_view", "u_m4_projection", "u_texture_size"]);
 		CreateResource("texture-shader", "shader", textureShader, null);
 
 		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, true);
 		CreateResource("player-texture", "texture", GetRC("image-player"), GetRC("image-player"));
 
 		var BlueTexture = CreateTexture(GetRC("image-blue"), gl.NEAREST, gl.NEAREST, true);
-		CreateResource("tile-blue-texture", "texture", GetRC("image-blue"), GetRC("image-blue"));
+		CreateResource("tile-blue-texture", "texture", BlueTexture, GetRC("image-blue"));
 
-		Player = new GameObject([Width/2, Height/2], [GetRC("image-player").width/2, GetRC("image-player").height/2]);
+		Player = new GameObject([Width/2, Height/2], [80, 80]);
 		Player.texture = playerTexture;
 		Player.shader = textureShader;
 		Player.prepare();
 
 		// GameObjects.push(Player);
-		BlueTile1 = new GameObject([0, Height-TileHeight], [TileWidth, TileHeight]);
+		BlueTile1 = new GameObject([TileWidth*30/2, Height-TileHeight/2], [TileWidth*30, TileHeight]);
 		BlueTile1.texture = GetRC("tile-blue-texture");
 		BlueTile1.shader = textureShader;
-		GameObjects.push(BlueTile1);
+		BlueTile1.prepare();
+		GameObjectsStatic.push(BlueTile1);
 
 		Setup();
 	});
@@ -208,11 +219,38 @@ function UpdateAndRender() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	GameObjects.filter()
+	var power = 1.8;
+	var drag = 0.83;
+
+	if(KEYBOARD.keyIsDown("a")) {
+		Player.acceleration.x = -power;
+	}
+	if(KEYBOARD.keyIsDown("d")) {
+		Player.acceleration.x = power;
+	}
+	if(KEYBOARD.keyIsDown("w")) {
+		Player.acceleration.y = -power;
+	}
+	if(KEYBOARD.keyIsDown("s")) {
+		Player.acceleration.y = power;
+	}
+
+	Player.velocity = Vector2.add(Player.velocity, Player.acceleration);
+	Player.velocity = Vector2.scale(Player.velocity, drag);
+	Player.position = Vector2.add(Player.position, Player.velocity);
+	
+	Player.acceleration = [0, 0];
+	Player.update();
+
+	GameObjectsStatic.forEach(function(c){
+		var cresult = SATCollision(Player.scaledPolygon, c.scaledPolygon);
+		if(cresult) {
+			Player.position = Vector2.add(Player.position, Vector2.scale(cresult[0], cresult[1]));
+		}
+		c.render();
+	});
 
 	Player.render();
-
-
 
 	requestAnimFrame(UpdateAndRender);	
 }
