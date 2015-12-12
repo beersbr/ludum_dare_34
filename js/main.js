@@ -224,7 +224,7 @@ function InitializeGame(resources_array) {
 		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, true);
 		CreateResource("player-texture", "texture", GetRC("image-player"), GetRC("image-player"));
 
-		Player = new GameObject([Width/2, Height/2], [80, 80]);
+		Player = new GameObject([Width/2, Height/2], [64, 64]);
 		Player.texture = playerTexture;
 		Player.shader = textureShader;
 		Player.shortJumpTime = 100; //ms
@@ -354,6 +354,9 @@ function UpdateAndRender() {
 
 			if(cresult[0].y < 0 && Math.abs(cresult[0].y) > Math.abs(cresult[0].x)) {
 				Player.onGround = true;
+			}
+			else {
+				Player.onGround = false;
 			}
 		}
 		c.render();
