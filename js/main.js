@@ -389,7 +389,7 @@ function UpdateAndRender() {
 		if(cresult) {
 			Player.position = Vector2.add(Player.position, Vector2.scale(cresult[0], cresult[1]));
 
-			if(cresult[0].y < 0 && Math.abs(cresult[0].y) > Math.abs(cresult[0].x)) {
+			if(Math.abs(cresult[0].y) > 0 && Math.abs(cresult[0].y) > Math.abs(cresult[0].x)) {
 				Player.onGround = true;
 			}
 			else {
