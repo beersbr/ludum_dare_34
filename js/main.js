@@ -137,19 +137,35 @@ function GameObject(position, size) {
 	this.texture = null;
 	this.shader = null;
 
+	this.stretch = false;
+
+	this.resize = function() {
+		this.scaledPolygon = this.polygon.map(function(c){
+			return Vector2.multiply(c, self.size)
+		});
+		return this.scaledPolygon;
+	}
+
 	this.update = function() {
-		this.scaledPolygon = this.polygon.map(function(c){ 
-			return Vector2.add(Vector2.multiply(c, self.size), self.position);
+		this.resize();
+		this.translatedPolygon = this.scaledPolygon.map(function(c){ 
+			return Vector2.add(c, self.position);
 		});
 	}
 
 	this.prepare = function() {
-		this.geometry = TriangulateConvexPolygon(this.polygon.slice());
+		
+		this.resize();
+		this.bb = PolygonBoundingBox(this.scaledPolygon);
+
+		var denom = (this.stretch) ? [this.bb[2], this.bb[3]] : [TileWidth, TileHeight];
+
+		this.geometry = TriangulateConvexPolygon(this.scaledPolygon.slice());
 		this.triangles = this.geometry.slice();
 		this.geometry = this.geometry.reduce(function(r, c) {
-			r.push(c[0].x, c[0].y, Math.abs(c[0].x-self.bb.x)/self.bb[2], Math.abs(c[0].y+self.bb.y)/self.bb[3],
-				   c[1].x, c[1].y, Math.abs(c[1].x-self.bb.x)/self.bb[2], Math.abs(c[1].y+self.bb.y)/self.bb[3],
-				   c[2].x, c[2].y, Math.abs(c[2].x-self.bb.x)/self.bb[2], Math.abs(c[2].y+self.bb.y)/self.bb[3]);
+			r.push(c[0].x, c[0].y, Math.abs(c[0].x+(self.bb[2]/2))/denom.x, Math.abs(c[0].y+(self.bb[3]/2))/denom.y,
+				   c[1].x, c[1].y, Math.abs(c[1].x+(self.bb[2]/2))/denom.x, Math.abs(c[1].y+(self.bb[3]/2))/denom.y,
+				   c[2].x, c[2].y, Math.abs(c[2].x+(self.bb[2]/2))/denom.x, Math.abs(c[2].y+(self.bb[3]/2))/denom.y);
 			return r;
 		}, []);
 
@@ -170,10 +186,12 @@ function GameObject(position, size) {
 
 		var model = Matrix4.create();
 		model = Matrix4.translate(model, [this.position.x, this.position.y, 0.0]);
-		model = Matrix4.scale(model, [this.size.x, this.size.y, 1.0]);
+		// model = Matrix4.scale(model, [this.size.x, this.size.y, 1.0]);
 		
 		gl.uniformMatrix4fv(this.shader.uniforms["u_m4_model"], false, model); 
 		gl.uniform1i(this.shader.uniforms["u_sampler2d_texture"], 0);
+
+		gl.uniform2fv(this.shader.uniforms["u_v2_texture_ratio"], [self.size.x/40, self.size.y/40]);
 
 		// TODO(brett): this can be moved to a texture starter and stopper
 
@@ -221,7 +239,7 @@ function InitializeGame(resources_array) {
 			["u_f_time", "u_sampler2d_texture", "u_m4_model", "u_m4_view", "u_m4_projection", "u_texture_size"]);
 		CreateResource("texture-shader", "shader", textureShader, null);
 
-		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, true);
+		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, false);
 		CreateResource("player-texture", "texture", GetRC("image-player"), GetRC("image-player"));
 
 		Player = new GameObject([Width/2, Height/2], [64, 64]);
@@ -232,6 +250,7 @@ function InitializeGame(resources_array) {
 		Player.jumpTime = 0.0;
 		Player.isJumping = false;
 		Player.onGround = false;
+		Player.stretch = true;
 		
 
 		Player.prepare();
@@ -243,12 +262,12 @@ function InitializeGame(resources_array) {
 
 		LoadResources(levelImages).done(function() {
 			mapJson.textures.forEach(function(c) {
-				var t = CreateTexture(GetRC(c.src), gl.NEAREST, gl.NEAREST, true);
+				var t = CreateTexture(GetRC(c.src), gl.NEAREST, gl.NEAREST, false);
 				CreateResource(c.key, "texture", t, GetRC(c.src));
 			});
 
 			mapJson.objects.forEach(function(c){
-				var obj = new GameObject([c.position.x+c.size.x/2, Height-c.position.y + c.size.y/2], c.size);
+				var obj = new GameObject([c.position.x+c.size.x/2, Height-c.position.y-c.size.y/2], c.size);
 				obj.shader = textureShader;
 				obj.texture = GetRC(c.texture);
 				obj.prepare();
@@ -258,19 +277,7 @@ function InitializeGame(resources_array) {
 			});
 
 			Setup();
-		})
-
-		// var BlueTexture = CreateTexture(GetRC("image-blue"), gl.NEAREST, gl.NEAREST, true);
-		// CreateResource("tile-blue-texture", "texture", BlueTexture, GetRC("image-blue"));
-
-		// // GameObjects.push(Player);
-		// BlueTile1 = new GameObject([TileWidth*30/2, Height-TileHeight/2], [TileWidth*30, TileHeight]);
-		// BlueTile1.texture = GetRC("tile-blue-texture");
-		// BlueTile1.shader = textureShader;
-		// BlueTile1.prepare();
-		// GameObjectsStatic.push(BlueTile1);
-
-		// Setup();
+		});
 	});
 }
 
@@ -325,10 +332,10 @@ function UpdateAndRender() {
 		Player.jumpTime += frameTime;
 		
 		if(Player.jumpTime < Player.shortJumpTime) {
-			Player.acceleration.y -= power*4;
+			Player.acceleration.y -= power*3.3;
 		}
 		else if(Player.jumpTime < Player.highJumpTime) {
-			Player.acceleration.y -= power*3;
+			Player.acceleration.y -= power*2.5;
 		}
 	}
 
@@ -342,13 +349,13 @@ function UpdateAndRender() {
 	Player.acceleration = [0, 0];
 	Player.update();
 
-	var cameraDelta = Vector3.scale(Vector3.sub([Player.position.x-Width/2, Player.position.y-(Height*(5/7)), 0], Camera[0]), 0.05);
+	var cameraDelta = Vector3.scale(Vector3.sub([Player.position.x-Width/2, Player.position.y-Height/2, 0], Camera[0]), 0.05);
 	Camera[0] = Vector3.add(Camera[0], cameraDelta);
 	Camera[1] = [Camera[0].x, Camera[0].y, -1];
 	ViewMatrix = Matrix4.lookAt(Camera[0], Camera[1], Camera[2]);
 
 	GameObjectsStatic.forEach(function(c){
-		var cresult = SATCollision(Player.scaledPolygon, c.scaledPolygon);
+		var cresult = SATCollision(Player.translatedPolygon, c.translatedPolygon);
 		if(cresult) {
 			Player.position = Vector2.add(Player.position, Vector2.scale(cresult[0], cresult[1]));
 

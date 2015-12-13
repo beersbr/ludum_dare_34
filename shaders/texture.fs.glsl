@@ -2,6 +2,7 @@ precision mediump float;
 
 uniform float u_f_time;
 uniform sampler2D u_sampler2d_texture;
+uniform vec2 u_v2_texture_ratio;
 
 uniform vec3 color;
 
@@ -11,6 +12,8 @@ void main(void) {
 	float time = u_f_time/100.0;
 
 	vec2 offset = vec2(cos(time+o_v2_uv.y*2.0)*(-0.2) , 0);
+
+	vec2 uv = vec2(fract(o_v2_uv.x*u_v2_texture_ratio.x), fract(o_v2_uv.y*u_v2_texture_ratio.y));
 
 	vec4 txcolor = texture2D(u_sampler2d_texture, o_v2_uv);
 	// txcolor.r = (txcolor.r + gl_FragCoord.y/768.0);
