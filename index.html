@@ -3,6 +3,7 @@
 <head>
 	<title>Ludum Dare 34</title>
 	<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="js/audio.js"></script>
 	<script type="text/javascript" src="js/bretter.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
 
@@ -14,6 +15,10 @@
 			CreateResourceTemplate("image-green", "image", "images/bg_green.png"),
 			CreateResourceTemplate("image-red", "image", "images/bg_red.png"),
 			CreateResourceTemplate("image-player", "image", "images/duck_outline_back.png"),
+            
+            CreateResourceTemplate("audio-jump1", "audio", "audio/effects/Jump1.wav"),
+            CreateResourceTemplate("audio-hit1", "audio", "audio/effects/hit1.wav"),
+            CreateResourceTemplate("audio-woo", "audio", "audio/effects/woo.wav"),
 			
 			CreateResourceTemplate("texture-shader-vs", "text", "shaders/texture.vs.glsl"),
 			CreateResourceTemplate("texture-shader-fs", "text", "shaders/texture.fs.glsl"),
