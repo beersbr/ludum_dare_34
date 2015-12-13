@@ -5,9 +5,12 @@
 	<style>
 		#grid { float:left; position: relative; }
 		.square { border:1px solid #000; float:left; height:32px; width:32px; }
+		.square img { height:32px; width:32px;}
 		.clear { float:left; clear:both; }
 		#output-wrap { float:left; }
 		#output { float:left; height: 440px; position: relative; width:640px; margin-left:10px; }
+		#textures {	 margin:10px; }
+		#textures img { height:32px; width:32px;}
 	</style>
 	<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript" src="js/bretter.js"></script>
@@ -18,32 +21,87 @@
 
 	var stageObject = {"level_id":0,"stage_id":0,"images":[],"textures":[],"sounds":[],"objects":[]}
 
+	var textures = {
+
+		"tile-blue-texture": {
+			"img": "image-blue",
+			"src": "images/bg_blue.png",
+		},
+		"tile-green-texture": {
+			"img": "image-green",
+			"src": "images/bg_green.png",
+		}
+	};
+
 	function buildGrid() {
-		for(y = 416; y >= 0; y = y - 32) {
-			for(x = 0; x <= 600; x = x + 32) {
+		for(y = 400; y >= 0; y = y - 20) {
+			for(x = 0; x <= 600; x = x + 20) {
 				$("#grid").append("<div class='square' data-x='"+(x*2)+"' data-y='"+(y*2)+"'></div>");
 			}
 			$("#grid").append("<div class='clear'></div>");
 		}
 		$(".square").click(function() {
-			stageObject.objects.push({
+			selectedTexture = $('input[name=texture]:checked').val()
+			textureInfo = textures[selectedTexture];
+
+			// Check if we need to add this texture and image to the map's master list
+			foundImage = false
+			for(i in stageObject.images) {
+				if(stageObject.images[i].key == textureInfo.img) {
+					foundImage = true;
+					break;
+				}
+			}
+			if(!foundImage) stageObject.images.push({"key":textureInfo.img, "src":textureInfo.src})
+
+			foundTexture = false
+			for(t in stageObject.textures) {
+				if(stageObject.textures[t].key == selectedTexture) {
+					foundTexture = true;
+					break;
+				}
+			}
+			if(!foundTexture) stageObject.textures.push({"key":selectedTexture, "src":textureInfo.img})
+
+			// Update the grid with the image
+			$(this).html("<img src='"+textureInfo.src+"'/>");
+
+			// Keep track if we updated an existing tile
+			foundTile = false;
+
+			tileObject = {
 				"shader": "default",
-				"texture": "tile-blue-texture",
+				"texture": selectedTexture,
 				"position": [$(this).data("x"),$(this).data("y")],
-				"size": [64,64],
+				"size": [40,40],
 				"static": true
-			})
-			$("#output").val(JSON.stringify(stageObject))
+			}
+
+			// Check if square already exists in object
+			for(tO in stageObject.objects) {
+				if(JSON.stringify(stageObject.objects[tO].position) == JSON.stringify([$(this).data("x"),$(this).data("y")])) {
+					stageObject.objects[tO] = tileObject;
+					foundTile = true;
+					break;
+				}
+			}
+
+			if(!foundTile) stageObject.objects.push(tileObject);
+			$("#output").val(JSON.stringify(stageObject));
 		});
 	}
 
-	function generate() {
-
+	function buildTextures() {
+		
+		for(t in textures) {
+			$("#textures").append("<label for='texture-"+t+"'><img src='"+textures[t].src+"'/></label><input type='radio' name='texture' id='texture-"+t+"' value='"+t+"' />");
+		}
 	}
 
 	window.onload = function() {
-		buildGrid()
-		$("#output").val(JSON.stringify(stageObject))
+		buildGrid();
+		buildTextures();
+		$("#output").val(JSON.stringify(stageObject));
 	}
 	</script>
 
@@ -51,7 +109,8 @@
 <body>
 	<div id="grid"></div>
 	<div id="output-wrap">
-		<textarea id="output"></textarea>	
+		<textarea id="output"></textarea>
+		<div id="textures"></div>
 	</div>
 </body>
 </html>

@@ -1,0 +1,21 @@
+<html>
+	<head>
+		<title>It Grows!</title>
+	</head>
+	<body>
+		<span id="balls">8</span>
+		<span id="shaft">=</span>
+		<span id="head">D</span>
+		<br>
+		<input type="button" value="GROW!" onclick="grow()">
+		<input type="button" value="Reset!" onclick="reset()">
+		<script>
+			function grow() {
+				document.getElementById("shaft").innerHTML = document.getElementById("shaft").innerHTML + "="
+			}
+			function reset() {
+				document.getElementById("shaft").innerHTML = "="
+			}
+		</script>
+	</body>
+</html>
