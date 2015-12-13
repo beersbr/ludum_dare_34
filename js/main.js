@@ -53,7 +53,8 @@ function GetStageResources(levelId, stageId) {
 
 function LoadResources(resource_array) { 
 	var p = new Promise();
-	
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    window.audCtx = new AudioContext();
 	var tryReturn = function() {
 		var itemCount = resource_array.length;
 		var tries = ++tryReturn.tries;
@@ -64,7 +65,6 @@ function LoadResources(resource_array) {
 
 	LoadResources.ids = LoadResources.ids || 0;
     
-    audioToLoad = new Array();
 
 	for(var index in resource_array) {
 		var resource = {};
@@ -96,9 +96,31 @@ function LoadResources(resource_array) {
 					});
 				}(resource));
 				break;
-		}
-	}
-
+            case "audio":
+                (function(item){
+                    item.item = "";
+                    console.log("[=] Audio init: Loading " + resource.src);
+                    var req = new XMLHttpRequest();
+                    req.responseType = "arraybuffer";
+                    req.open('GET' , resource.src, true);
+                    req.onload = function() {
+                        //audioData = new ArrayBuffer(req.response);
+                        item.item = req.response;
+                        Resources[item.key] = item;
+                        window.audCtx.decodeAudioData(req.response, function(buffer) {
+                            item.item = buffer;
+                            Resources[item.key] = item;
+                        }, function() {
+                            console.log("[!] Failed to load audio resource");
+                        });
+                    };
+                    req.send();
+                    tryReturn();
+                }(resource));
+                break;
+        }
+    }
+        
 	return p;
 }
 
@@ -228,6 +250,9 @@ function InitializeGame(resources_array) {
 		var playerTexture = CreateTexture(GetRC("image-player"), gl.NEAREST, gl.NEAREST, true);
 		CreateResource("player-texture", "texture", GetRC("image-player"), GetRC("image-player"));
 
+        Audio = new AudioHandler();
+        Audio.init();
+        
 		Player = new GameObject([Width/2, Height/2], [64, 64]);
 		Player.texture = playerTexture;
 		Player.shader = textureShader;
@@ -314,6 +339,7 @@ function UpdateAndRender() {
 		if(Player.onGround) {
 			Player.isJumping = true;
 			Player.onGround = false;
+            Audio.playSound( GetRC("audio-jump1") );
 		}
 	}
 	else {
