@@ -21,6 +21,7 @@ var CurrentLevel = null;
 var Player = null;
 
 var GameObjectsStatic = [];
+var GameObjectsDynamic = [];
 
 var Resources = {};
 
@@ -280,6 +281,7 @@ function InitializeGame(resources_array) {
 		Player.isJumping = false;
 		Player.onGround = false;
 		Player.stretch = true;
+		Player.lastShot = 0.0;
 		
 
 		Player.prepare();
@@ -342,11 +344,10 @@ function UpdateAndRender() {
 	if(KEYBOARD.keyIsDown("d")) {
 		Player.acceleration.x = power;
 	}
-	if(KEYBOARD.keyIsDown("w")) {
+	if(KEYBOARD.keyIsDown("w") || KEYBOARD.keyIsDown("spacebar")) {
 		if(Player.onGround) {
 			Player.isJumping = true;
 			Player.onGround = false;
-            Audio.playSound( GetRC("audio-jump1") );
 		}
 	}
 	else {
@@ -356,6 +357,22 @@ function UpdateAndRender() {
 
 	if(KEYBOARD.keyIsDown("s")) {
 		Player.acceleration.y = power;
+	}
+
+	if(KEYBOARD.keyIsDown("j")) {
+
+		if(CurrentTime - Player.lastShot > 300) {
+			Player.lastShot = CurrentTime;
+
+			var b = new GameObject(Player.position.slice(), [30, 10]);
+			b.stretch = true;
+			b.texture = GetRC("tile-blue-texture");
+			b.shader = GetRC("texture-shader");
+			b.velocity = [1200, 0];
+			b.prepare();
+
+			GameObjectsDynamic.push(b);
+		}
 	}
 
 	if(Player.isJumping) {
@@ -385,18 +402,33 @@ function UpdateAndRender() {
 	ViewMatrix = Matrix4.lookAt(Camera[0], Camera[1], Camera[2]);
 
 	GameObjectsStatic.forEach(function(c){
-		var cresult = SATCollision(Player.translatedPolygon, c.translatedPolygon);
-		if(cresult) {
-			Player.position = Vector2.add(Player.position, Vector2.scale(cresult[0], cresult[1]));
+		var collisionResult = SATCollision(Player.translatedPolygon, c.translatedPolygon);
+		if(collisionResult) {
+			Player.position = Vector2.add(Player.position, Vector2.scale(collisionResult[0], collisionResult[1]));
 
-			if(Math.abs(cresult[0].y) > 0 && Math.abs(cresult[0].y) > Math.abs(cresult[0].x)) {
+			if(collisionResult[0].y <= 0 && Math.abs(collisionResult[0].y) > Math.abs(collisionResult[0].x)) {
 				Player.onGround = true;
 			}
-			else {
-				Player.onGround = false;
-			}
+			// else {
+			// 	Player.onGround = false;
+			// }
 		}
 		c.render();
+	});
+
+	GameObjectsDynamic = GameObjectsDynamic.filter(function(c) {
+		c.position = Vector2.add(c.position, Vector2.scale(c.velocity, frameTime/1000));
+		c.update();
+
+		var shouldLive = true;
+
+		GameObjectsStatic.forEach(function(s) {
+			shouldLive = !!!SATCollision(c.translatedPolygon, s.translatedPolygon);
+			
+		});
+
+		c.render();
+		return shouldLive;
 	});
 
 	Player.render();
