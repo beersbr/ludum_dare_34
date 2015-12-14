@@ -409,9 +409,6 @@ function UpdateAndRender() {
 			if(collisionResult[0].y <= 0 && Math.abs(collisionResult[0].y) > Math.abs(collisionResult[0].x)) {
 				Player.onGround = true;
 			}
-			// else {
-			// 	Player.onGround = false;
-			// }
 		}
 		c.render();
 	});
@@ -422,12 +419,13 @@ function UpdateAndRender() {
 
 		var shouldLive = true;
 
-		GameObjectsStatic.forEach(function(s) {
-			shouldLive = !!!SATCollision(c.translatedPolygon, s.translatedPolygon);
-			
-		});
-
 		c.render();
+		for(var i = 0; i < GameObjectsStatic.length; ++i) {
+			var s = GameObjectsStatic[i];
+			shouldLive = !!!SATCollision(c.translatedPolygon, s.translatedPolygon);
+			if(!shouldLive) break;
+		}
+
 		return shouldLive;
 	});
 
