@@ -272,7 +272,7 @@ function InitializeGame(resources_array) {
         Audio = new AudioHandler();
         Audio.init();
         
-		Player = new GameObject([Width/2, Height/2], [64, 64]);
+		Player = new GameObject([Width/2, Height/2], [40, 40]);
 		Player.texture = playerTexture;
 		Player.shader = textureShader;
 		Player.shortJumpTime = 100; //ms
@@ -334,7 +334,7 @@ function UpdateAndRender() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	var power = 150;
+	var power = 120;
 	var drag = 0.83;
 	var gravity = [0, 120];
 
@@ -379,15 +379,16 @@ function UpdateAndRender() {
 		Player.jumpTime += frameTime;
 		
 		if(Player.jumpTime < Player.shortJumpTime) {
-			Player.acceleration.y -= power*3.3;
+			Player.acceleration.y -= power*2.9;
 		}
 		else if(Player.jumpTime < Player.highJumpTime) {
-			Player.acceleration.y -= power*2.5;
+			Player.acceleration.y -= power*2.0;
 		}
 	}
 
 	// NOTE(Brett): gravity
-	Player.acceleration = Vector2.add(Player.acceleration, gravity);
+	// if(!Player.onGround)
+		Player.acceleration = Vector2.add(Player.acceleration, gravity);
 
 	Player.velocity = Vector2.add(Player.velocity, Player.acceleration);
 	Player.velocity = Vector2.scale(Player.velocity, drag);
@@ -405,9 +406,16 @@ function UpdateAndRender() {
 		var collisionResult = SATCollision(Player.translatedPolygon, c.translatedPolygon);
 		if(collisionResult) {
 			Player.position = Vector2.add(Player.position, Vector2.scale(collisionResult[0], collisionResult[1]));
+			Player.update();
 
 			if(collisionResult[0].y <= 0 && Math.abs(collisionResult[0].y) > Math.abs(collisionResult[0].x)) {
 				Player.onGround = true;
+				Player.velocity.y = 0.0;
+			}
+
+			if(!Player.onGround && Math.abs(collisionResult[0].x) >= 0 && Math.abs(collisionResult[0].y) < Math.abs(collisionResult[0].x)) {
+				Player.velocity.x = 0.0;
+				Player.velocity.y += -collisionResult[1];
 			}
 		}
 		c.render();
